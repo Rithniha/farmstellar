@@ -21,7 +21,7 @@ import { useState, useEffect } from "react";
 export default function LandingPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // useEffect(() => {
   //   // Check if user is authenticated
