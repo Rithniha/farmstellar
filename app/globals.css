@@ -3,7 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
 :root {
   /* Matcha Green + Lime Pop Aesthetic */
   /* Background & Base */
