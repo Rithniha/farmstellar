@@ -24,5 +24,12 @@
   "footer": {
     "copyright": "© 2025 FarmStellar. All rights reserved.",
     "mission": "Empowering farmers through gamified learning"
+  },
+  "i18n": {
+    "detected_auto": "{{lang}} selected {{source}}. Change in Settings.",
+    "source_geo": "based on your region",
+    "source_nav": "based on your browser language",
+    "open_settings": "Open Settings",
+    "dismiss": "Dismiss"
   }
 }
