@@ -122,7 +122,13 @@ export default function PWAProvider() {
                 fontWeight: 700,
               }}
             >
-              FS
+              <img
+                src="/icons/icon-192.svg"
+                alt="App Icon"
+                width={32}
+                height={32}
+                style={{ display: "block" }}
+              />
             </div>
             <div style={{ fontSize: 14 }}>
               <div style={{ fontWeight: 700 }}>Install Farmstellar</div>

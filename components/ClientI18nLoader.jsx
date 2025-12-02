@@ -1,16 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import i18n from "../app/i18n";
 import { loadFontForCode } from "../lib/font";
+
 export default function ClientI18nLoader() {
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const router = useRouter();
+
   useEffect(() => {
     let mounted = true;
+    let toastTimer = null;
 
     // Use shared loader
 
     async function detectAndApply() {
       let chosen = "en";
+      let userSelected = false;
+      let detectedAutomatically = false;
+      let detectionSource = null; // 'navigator' | 'geo'
 
       // 0) Pre-hydration fast path (hint set by layout inline script)
       try {
@@ -34,15 +44,14 @@ export default function ClientI18nLoader() {
         if (stored) chosen = stored;
       } catch (e) {}
 
-      // 3) navigator language (only if we still have english)
       // If the user has explicitly selected a language previously, skip auto-detection
-      let userSelected = false;
       try {
         userSelected = !!localStorage.getItem("farmstellar_lang_user");
       } catch (e) {
         userSelected = false;
       }
 
+      // 3) navigator language (only if we still have english)
       try {
         if (!userSelected && (!chosen || chosen === "en")) {
           const nav = (
@@ -50,10 +59,23 @@ export default function ClientI18nLoader() {
             navigator.userLanguage ||
             ""
           ).toLowerCase();
-          if (nav.startsWith("ta")) chosen = "ta";
-          else if (nav.startsWith("ml")) chosen = "ml";
-          else if (nav.startsWith("mr")) chosen = "mr";
-          else if (nav.startsWith("hi")) chosen = "hi";
+          if (nav.startsWith("ta")) {
+            chosen = "ta";
+            detectedAutomatically = true;
+            detectionSource = "navigator";
+          } else if (nav.startsWith("ml")) {
+            chosen = "ml";
+            detectedAutomatically = true;
+            detectionSource = "navigator";
+          } else if (nav.startsWith("mr")) {
+            chosen = "mr";
+            detectedAutomatically = true;
+            detectionSource = "navigator";
+          } else if (nav.startsWith("hi")) {
+            chosen = "hi";
+            detectedAutomatically = true;
+            detectionSource = "navigator";
+          }
         }
       } catch (e) {}
 
@@ -65,21 +87,31 @@ export default function ClientI18nLoader() {
             const data = await resp.json();
             if (data && data.country === "IN") {
               const region = (data.region || "").toLowerCase();
-              if (region.includes("tamil") || region.includes("chennai"))
+              if (region.includes("tamil") || region.includes("chennai")) {
                 chosen = "ta";
-              else if (
+                detectedAutomatically = true;
+                detectionSource = "geo";
+              } else if (
                 region.includes("kerala") ||
                 region.includes("thiruvananthapuram") ||
                 region.includes("kochi")
-              )
+              ) {
                 chosen = "ml";
-              else if (
+                detectedAutomatically = true;
+                detectionSource = "geo";
+              } else if (
                 region.includes("maharashtra") ||
                 region.includes("mumbai") ||
                 region.includes("pune")
-              )
+              ) {
                 chosen = "mr";
-              else chosen = "hi";
+                detectedAutomatically = true;
+                detectionSource = "geo";
+              } else {
+                chosen = "hi";
+                detectedAutomatically = true;
+                detectionSource = "geo";
+              }
 
               console.log(
                 "Detected region",
@@ -125,6 +157,29 @@ export default function ClientI18nLoader() {
         // load font (if any) and wait for it before revealing
         await loadFontForCode(chosen);
       } catch (e) {}
+
+      // If we auto-detected the language, show a short toast so user knows and can change in settings
+      try {
+        if (!userSelected && detectedAutomatically && mounted) {
+          const langNames = {
+            en: "English",
+            ta: "தமிழ்",
+            ml: "മലയാളം",
+            hi: "हिन्दी",
+            mr: "मराठी",
+          };
+          const langLabel = langNames[chosen] || chosen;
+          const sourceKey = detectionSource === "geo" ? "i18n.source_geo" : "i18n.source_nav";
+          const message = i18n.t("i18n.detected_auto", {
+            lang: langLabel,
+            source: i18n.t(sourceKey),
+          });
+          setToastMessage(message);
+          setShowToast(true);
+          // Hide after 5s
+          toastTimer = setTimeout(() => setShowToast(false), 5000);
+        }
+      } catch (e) {}
     }
 
     (async () => {
@@ -134,8 +189,41 @@ export default function ClientI18nLoader() {
 
     return () => {
       mounted = false;
+      if (toastTimer) clearTimeout(toastTimer);
     };
-  }, []);
+  }, [router]);
 
-  return null;
+  return (
+    <>
+      {showToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-slide-down">
+          <div className="bg-accent text-accent-foreground px-4 py-3 rounded-2xl shadow-2xl border-2 border-accent/30 flex items-center gap-3 max-w-md">
+            <div className="text-sm">{toastMessage}</div>
+            <div className="ml-2 flex items-center gap-2">
+              <button
+                className="text-sm underline"
+                onClick={() => {
+                  setShowToast(false);
+                  try {
+                    router.push("/settings");
+                  } catch (e) {
+                    window.location.href = "/settings";
+                  }
+                }}
+              >
+                {i18n.t("i18n.open_settings")}
+              </button>
+              <button
+                aria-label={i18n.t("i18n.dismiss")}
+                className="text-sm opacity-80"
+                onClick={() => setShowToast(false)}
+              >
+                {i18n.t("i18n.dismiss")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
