@@ -3,7 +3,7 @@ import helmet from "helmet";
 import compression from "compression";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDB } from "./server/mongoose/connection.js";
+import { connectDB } from "./server/config/db.js";
 import serverRouter from "./server/index.js";
 import mongoose from "mongoose";
 
@@ -31,6 +31,12 @@ app.get("/api/health", (req, res) => {
 
 // Mount modular server routes under /api
 app.use("/api", serverRouter);
+
+app.use("/", (req, res) => {
+  res.json({
+    message: "Welcome to the Farmstellar Server, explore our apis at /api",
+  });
+});
 
 // Generic error handler
 app.use((err, req, res, next) => {

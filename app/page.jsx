@@ -16,7 +16,6 @@ import {
   Globe,
 } from "lucide-react";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "@/components/ui/LanguageSelector";
@@ -111,8 +110,12 @@ export default function LandingPage() {
               </div>
 
               <div className="space-y-4">
-                <h1 className="text-5xl sm:text-5xl md:text-3xl font-bold leading-tight">
-                  {t("hero.title")}
+                <h1 className="text-5xl sm:text-5xl md:text-6xl font-bold leading-tight">
+                  <span>{t("hero.titlePart1")} </span>
+                  <span className="text-transparent bg-linear-to-r from-primary to-accent bg-clip-text">
+                    {t("hero.titleHighlight")}
+                  </span>
+                  <span> {t("hero.titlePart2")}</span>
                 </h1>
                 <p className="sm:text-xl text-muted-foreground leading-relaxed">
                   {t("hero.subtitle")}
@@ -122,7 +125,7 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-4">
                 <a
                   href="/login"
-                  className="btn-primary inline-flex items-center sm:text-lg sm:px-8 sm:py-6 shadow-xl hover:shadow-2xl rounded-md"
+                  className="btn-primary inline-flex items-center sm:text-lg sm:px-8 sm:py-0 shadow-xl hover:shadow-2xl rounded-md"
                 >
                   {t("hero.startJourney")}
                   <ArrowRight className="ml-2 w-5 h-5" />

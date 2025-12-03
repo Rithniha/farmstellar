@@ -63,6 +63,12 @@ export default function FarmOnboarding() {
       <div className="flex flex-col space-y-4">
         <Button
           onClick={() => {
+            try {
+              if (selectedType)
+                localStorage.setItem("onboard_level", selectedType);
+            } catch (e) {
+              console.warn("Failed to persist onboard level", e);
+            }
             router.push("/onboarding/farm-details");
           }}
           disabled={!selectedType}

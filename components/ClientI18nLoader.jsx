@@ -169,7 +169,8 @@ export default function ClientI18nLoader() {
             mr: "मराठी",
           };
           const langLabel = langNames[chosen] || chosen;
-          const sourceKey = detectionSource === "geo" ? "i18n.source_geo" : "i18n.source_nav";
+          const sourceKey =
+            detectionSource === "geo" ? "i18n.source_geo" : "i18n.source_nav";
           const message = i18n.t("i18n.detected_auto", {
             lang: langLabel,
             source: i18n.t(sourceKey),
@@ -197,7 +198,7 @@ export default function ClientI18nLoader() {
     <>
       {showToast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-slide-down">
-          <div className="bg-accent text-accent-foreground px-4 py-3 rounded-2xl shadow-2xl border-2 border-accent/30 flex items-center gap-3 max-w-md">
+          <div className="bg-accent text-accent-foreground px-4 py-3 rounded-2xl shadow-2xl border-2 border-accent/30 flex items-center gap-3 max-w-3xl">
             <div className="text-sm">{toastMessage}</div>
             <div className="ml-2 flex items-center gap-2">
               <button

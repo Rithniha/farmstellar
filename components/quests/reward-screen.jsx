@@ -1,6 +1,7 @@
 "use client";
 
 import { Zap, Trophy, Share2, ArrowRight, Users } from "lucide-react";
+import toast from "react-hot-toast";
 
 export function RewardScreen({
   quest,
@@ -17,7 +18,7 @@ export function RewardScreen({
         url: window.location.href,
       });
     } else {
-      alert(
+      toast(
         "Sharing is not supported on this browser, but you can take a screenshot!"
       );
     }
@@ -96,7 +97,9 @@ export function RewardScreen({
           {/* Secondary Actions */}
           <div className="flex gap-3">
             <button
-              onClick={() => alert("Shared to Community Feed! (Simulation)")}
+              onClick={() =>
+                toast.success("Shared to Community Feed! (Simulation)")
+              }
               className="flex-1 bg-accent/10 text-accent font-bold py-3 rounded-xl hover:bg-accent/20 transition-colors flex items-center justify-center gap-2 border border-accent/20"
             >
               <Users className="w-5 h-5" />

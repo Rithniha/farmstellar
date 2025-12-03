@@ -92,3 +92,17 @@ This project was built with ❤️ by:
 - ⚙️ RITHNIHA
 - 🎨 SANGEETHA
 - 🚀 SUBARANJANI
+
+## 🧪 Local Dev: Proxy to Express Backend
+
+- **Purpose**: During local development the Next.js dev server can proxy requests under `/api/*` to the local Express server running on port `4000` so the frontend can call the backend without changing request URLs.
+- **How it works**: `next.config.ts` contains a development-only rewrite that proxies `/api/:path*` to `http://localhost:4000/api/:path*`.
+- **If you prefer absolute URLs**: Create a `.env.local` file with:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+Then, use `process.env.NEXT_PUBLIC_API_URL` in the frontend when building absolute API URLs.
+
+If you run the Express server on another port, update `next.config.ts` or set `NEXT_PUBLIC_API_URL` accordingly.

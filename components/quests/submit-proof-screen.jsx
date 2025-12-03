@@ -1,68 +1,78 @@
-"use client"
+"use client";
 
-import { ChevronLeft, MessageSquare, CheckCircle2, X, Camera } from "lucide-react"
-import { useState, useRef } from "react"
+import {
+  ChevronLeft,
+  MessageSquare,
+  CheckCircle2,
+  X,
+  Camera,
+} from "lucide-react";
+import { useState, useRef } from "react";
+import toast from "react-hot-toast";
 
 export function SubmitProofScreen({ quest, onSubmit, onBack }) {
-  const [notes, setNotes] = useState("")
-  const [uploadedImage, setUploadedImage] = useState(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isCameraActive, setIsCameraActive] = useState(false)
-  const videoRef = useRef(null)
-  const streamRef = useRef(null)
-  const showPhotoOption = quest.id !== "crops"
+  const [notes, setNotes] = useState("");
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const showPhotoOption = quest.id !== "crops";
 
-  const canSubmit = uploadedImage !== null
+  const canSubmit = uploadedImage !== null;
 
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" }, // Use back camera on mobile
-        audio: false
-      })
-      streamRef.current = stream
+        audio: false,
+      });
+      streamRef.current = stream;
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
+        videoRef.current.srcObject = stream;
       }
-      setIsCameraActive(true)
+      setIsCameraActive(true);
     } catch (error) {
-      console.error("Error accessing camera:", error)
-      alert("Unable to access camera. Please check permissions.")
+      console.error("Error accessing camera:", error);
+      toast.error("Unable to access camera. Please check permissions.");
     }
-  }
+  };
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop())
-      streamRef.current = null
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
-    setIsCameraActive(false)
-  }
+    setIsCameraActive(false);
+  };
 
   const capturePhoto = () => {
     if (videoRef.current) {
-      const canvas = document.createElement('canvas')
-      canvas.width = videoRef.current.videoWidth
-      canvas.height = videoRef.current.videoHeight
-      const ctx = canvas.getContext('2d')
-      ctx.drawImage(videoRef.current, 0, 0)
-      const imageData = canvas.toDataURL('image/jpeg')
-      setUploadedImage(imageData)
-      stopCamera()
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(videoRef.current, 0, 0);
+      const imageData = canvas.toDataURL("image/jpeg");
+      setUploadedImage(imageData);
+      stopCamera();
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    onSubmit()
-  }
+    setIsSubmitting(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    onSubmit();
+  };
 
   return (
     <div className="flex flex-col h-screen pb-safe">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
-        <button onClick={onBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
+        <button
+          onClick={onBack}
+          className="p-2 hover:bg-muted rounded-lg transition-colors"
+        >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-bold">Submit Proof</h1>
@@ -72,8 +82,12 @@ export function SubmitProofScreen({ quest, onSubmit, onBack }) {
       {/* Content */}
       <div className="flex-1 overflow-auto px-6 py-6 space-y-6 pb-32">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Show Your Work</h2>
-          <p className="text-sm text-muted-foreground">Submit evidence of quest completion</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Show Your Work
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Submit evidence of quest completion
+          </p>
         </div>
 
         {/* Upload Options */}
@@ -131,8 +145,12 @@ export function SubmitProofScreen({ quest, onSubmit, onBack }) {
                 className="w-full border-2 border-dashed border-primary bg-primary/5 rounded-xl p-6 hover:bg-primary/10 transition-all text-center"
               >
                 <Camera className="w-8 h-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-bold text-primary">Open Live Camera 📷</p>
-                <p className="text-xs text-muted-foreground mt-1">Take photo in real-time</p>
+                <p className="text-sm font-bold text-primary">
+                  Open Live Camera 📷
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Take photo in real-time
+                </p>
               </button>
             )}
           </div>
@@ -140,7 +158,9 @@ export function SubmitProofScreen({ quest, onSubmit, onBack }) {
 
         {/* Notes */}
         <div className="space-y-3">
-          <h3 className="font-bold text-foreground text-sm">Additional Notes</h3>
+          <h3 className="font-bold text-foreground text-sm">
+            Additional Notes
+          </h3>
           <div className="relative">
             <MessageSquare className="absolute top-3 left-3 w-5 h-5 text-muted-foreground pointer-events-none" />
             <textarea
@@ -159,10 +179,11 @@ export function SubmitProofScreen({ quest, onSubmit, onBack }) {
         <button
           onClick={handleSubmit}
           disabled={!canSubmit || isSubmitting}
-          className={`w-full font-bold py-4 rounded-2xl transition-all shadow-lg ${canSubmit && !isSubmitting
-            ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 active:scale-95"
-            : "bg-muted text-muted-foreground cursor-not-allowed"
-            }`}
+          className={`w-full font-bold py-4 rounded-2xl transition-all shadow-lg ${
+            canSubmit && !isSubmitting
+              ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 active:scale-95"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
+          }`}
         >
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-2">
@@ -174,5 +195,5 @@ export function SubmitProofScreen({ quest, onSubmit, onBack }) {
         </button>
       </div>
     </div>
-  )
+  );
 }

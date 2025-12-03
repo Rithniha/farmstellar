@@ -11,6 +11,9 @@
   "hero": {
     "badge": "Gamified Learning Platform",
     "title": "Master Sustainable Farming Through Play",
+    "titlePart1": "Master",
+    "titleHighlight": "Sustainable Farming",
+    "titlePart2": "Through Play",
     "subtitle": "Join thousands of farmers learning modern agricultural techniques through interactive quests, earn rewards, and build a sustainable future.",
     "startJourney": "Start Your Journey",
     "learnMore": "Learn More",
@@ -98,6 +101,95 @@
         "desc": "I'm an experienced farmer looking to optimize"
       }
     },
-    "continue": "Continue"
+    "continue": "Continue",
+    "basicInfo": {
+      "heading": "Tell us about yourself",
+      "subheading": "This helps personalize your experience",
+      "labels": {
+        "name": "Full name",
+        "email": "Email",
+        "location": "Location"
+      },
+      "placeholders": {
+        "name": "Your name",
+        "email": "you@example.com",
+        "location": "Village, District, State"
+      },
+      "detect": "Get Location",
+      "detecting": "Fetching...",
+      "continue": "Continue",
+      "errors": {
+        "name": "Please enter your full name (min 2 characters).",
+        "email": "Please enter a valid email address.",
+        "location": "Please provide your location."
+      }
+    },
+    "farmDetails": {
+      "heading": "Tell Us About Your Farm",
+      "subheading": "Help us customize your experience",
+      "noLand": {
+        "toggleLabel": "I am a beginner and don't have a farm yet",
+        "heading": "Perfect! Let's start your farming journey",
+        "body": "You'll access knowledge-based quests and tutorials. When you're ready to start your own farm, you can add the details anytime from your profile."
+      },
+      "labels": {
+        "farmName": "Farm Name (Optional)",
+        "location": "Location",
+        "landSize": "Land Size (in acres)"
+      },
+      "placeholders": {
+        "farmName": "Green Valley Farm",
+        "location": "Village, District, State",
+        "soilType": "Select soil type",
+        "waterSource": "Select water source"
+      },
+      "buttons": {
+        "detecting": "Detecting...",
+        "useCurrentLocation": "Use current location",
+        "saving": "Saving...",
+        "continue": "Continue",
+        "back": "Back"
+      },
+      "units": {
+        "acres": "acres"
+      },
+      "options": {
+        "soil": {
+          "clay": "Clay",
+          "sandy": "Sandy",
+          "loamy": "Loamy",
+          "silty": "Silty",
+          "peaty": "Peaty",
+          "chalky": "Chalky"
+        },
+        "water": {
+          "well": "Well",
+          "borewell": "Borewell",
+          "canal": "Canal",
+          "river": "River",
+          "rainwater": "Rainwater Harvesting",
+          "pond": "Pond"
+        }
+      },
+      "errors": {
+        "location": "Please provide your farm location",
+        "landSize": "Please enter a valid land size (> 0)",
+        "soilType": "Please select a soil type",
+        "waterSource": "Please select a water source",
+        "geolocationNotSupported": "Geolocation is not supported by your browser",
+        "unableToDetermineAddress": "Unable to determine address from coordinates",
+        "reverseGeocodeFailed": "Failed to reverse geocode location",
+        "getLocationFailed": "Failed to get location",
+        "completeProfile": "Failed to complete profile",
+        "saveFailed": "Failed to save farm details",
+        "saveFailedTryAgain": "Failed to save farm details. Please try again."
+      },
+      "messages": {
+        "pendingSynced": "Pending farm synced",
+        "profileCompleted": "Profile completed",
+        "saved": "Saved successfully",
+        "savedLocally": "Saved locally. Will sync when online."
+      }
+    }
   }
 }

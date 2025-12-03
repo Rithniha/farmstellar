@@ -4,8 +4,8 @@ const CORE_ASSETS = [
   "/login",
   "/dashboard",
   "/manifest.json",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
 ];
 
 self.addEventListener("install", (event) => {

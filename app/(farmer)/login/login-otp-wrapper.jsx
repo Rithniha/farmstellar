@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import LanguageSelector from "@/components/ui/LanguageSelector";
+import toast from "react-hot-toast";
 
 export default function LoginOTPWrapper() {
   // login | verify-otp
@@ -16,19 +17,95 @@ export default function LoginOTPWrapper() {
   const router = useRouter();
 
   const handleOTPSent = (phone) => {
-    setSection("verify-otp");
-    setPhone(phone);
+    // Send phone to backend to request OTP
+    (async () => {
+      try {
+        if (!/^\d{10}$/.test(phone)) {
+          toast.error("Please enter a valid 10-digit phone number");
+          return;
+        }
+
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          toast.error(data.message || data.error || "Failed to send OTP");
+          return;
+        }
+
+        // If server returned sampleOtp (dev), show it so developer can type it
+        if (data.sampleOtp) {
+          // warn developer (dev-only)
+          toast(`Dev OTP for ${phone}: ${data.sampleOtp}`);
+        }
+
+        // persist phone for onboarding flow (so next pages can access it)
+        try {
+          localStorage.setItem("onboard_phone", phone);
+        } catch (e) {
+          console.warn("Failed to persist onboard phone", e);
+        }
+
+        setPhone(phone);
+        setSection("verify-otp");
+      } catch (err) {
+        console.error("Error requesting OTP:", err);
+        toast.error("Network error while requesting OTP");
+      }
+    })();
   };
 
-  const handleVerifyOTP = (phone) => {
-    console.log("[v0] OTP verified for phone:", phone);
-    // If otp with phone matches, then Proceed to onboarding or dashboard
+  const handleVerifyOTP = async (phone, otp) => {
+    try {
+      if (!/^\d{6}$/.test(otp)) {
+        toast.error("Please enter a valid 6-digit OTP");
+        return { success: false };
+      }
 
-    // If it is first time login, redirect to onboarding
-    if (true) {
-      router.push(`/onboarding`);
-    } else {
-      router.push(`/dashboard`);
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        toast.error(data.message || data.error || "OTP verification failed");
+        return { success: false };
+      }
+
+      // If backend returned a token (existing user), store and navigate
+      if (data.token) {
+        try {
+          localStorage.setItem(
+            "farmquest_auth",
+            JSON.stringify({ token: data.token })
+          );
+        } catch (e) {
+          console.warn("Failed to persist token locally", e);
+        }
+      }
+
+      if (data.isNewUser) {
+        try {
+          localStorage.setItem("onboard_phone", phone);
+        } catch (e) {
+          console.warn("Failed to persist onboard phone", e);
+        }
+        // Go to basic info first
+        router.push("/onboarding/basic-info");
+      } else {
+        router.push("/dashboard");
+      }
+
+      return { success: true, data };
+    } catch (err) {
+      console.error("Error verifying OTP:", err);
+      toast.error("Network error while verifying OTP");
+      return { success: false };
     }
   };
 

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import toast from "react-hot-toast";
 
 export default function CommunityScreen() {
   const [posts, setPosts] = useState([
@@ -64,7 +65,7 @@ export default function CommunityScreen() {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + uploadedImages.length > 4) {
-      alert("You can upload a maximum of 4 images");
+      toast.error("You can upload a maximum of 4 images");
       return;
     }
 

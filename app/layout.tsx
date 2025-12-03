@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import ClientI18nLoader from "@/components/ClientI18nLoader";
 import PWAProvider from "@/components/PWAProvider";
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className={`${quicksandFont.className}  antialiased`}>
         <ClientI18nLoader />
         <PWAProvider />
+        <Toaster position="top-right" />
         {children}
         <Analytics />
       </body>

@@ -1,13 +1,44 @@
 "use client";
 
 import { Sun, Sparkles } from "lucide-react";
-import LeaderboardCard from "../../../components/app/leaderboard-card";
-import { UserProgressCard } from "../../../components/app/user-progress-card";
-import { WeatherAlertCard } from "../../../components/app/weather-alert-card";
-import { OngoingQuestsCard } from "../../../components/app/ongoing-quests-card";
-import { getGreeting } from "../../../lib/utils";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import LeaderboardCard from "@/components/app/leaderboard-card";
+import { UserProgressCard } from "@/components/app/user-progress-card";
+import { WeatherAlertCard } from "@/components/app/weather-alert-card";
+import { OngoingQuestsCard } from "@/components/app/ongoing-quests-card";
+import { getGreeting } from "@/lib/utils";
+import { useUser } from "@/lib/userContext";
+import Image from "next/image";
 
-export default function FarmerDashboard({ userData, onStartQuest }) {
+export default function FarmerDashboard({ onStartQuest }) {
+  const userData = useUser();
+  useEffect(() => {
+    const name = userData?.name;
+    if (!name) return;
+    try {
+      const key = `greeted_${name}`;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch (e) {
+      // ignore session storage errors
+    }
+
+    toast.success(
+      <div className="flex items-center gap-3">
+        <span className="text-2xl animate-wiggle" role="img" aria-label="wave">
+          👋
+        </span>
+        <div>
+          <div className="font-bold">
+            Welcome, {userData?.name || "Farmer"}!
+          </div>
+          <div className="text-xs text-muted-foreground">Happy farming 🌱</div>
+        </div>
+      </div>,
+      { duration: 4500 }
+    );
+  }, [userData?.name]);
   const handleResumeQuest = (questId) => {
     if (onStartQuest) {
       onStartQuest(questId);
@@ -19,10 +50,17 @@ export default function FarmerDashboard({ userData, onStartQuest }) {
       {/* Header */}
       <div className="bg-card/80 backdrop-blur-lg border-b border-border shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 py-6">
-          <div className="flex items-center gap-3 ml-16">
-            <div className="w-10 h-10 bg-linear-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+          <div className="flex justify-start items-center gap-3 ml-14 sm:ml-16">
+            {/* <div className="w-10 h-10 bg-linear-to-br from-primary to-accent rounded-xl flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            </div> */}
+            <Image
+              src="/logo.png"
+              alt="FarmStellar Logo"
+              width={40}
+              height={40}
+              className="rounded-lg"
+            />
             <div>
               <div className="flex items-center gap-2">
                 {/* <Sun className="w-4 h-4 text-accent" /> */}

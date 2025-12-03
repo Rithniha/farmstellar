@@ -25,7 +25,8 @@ export default function VerifyOTP({ phone, onOTPVerify, changeMobileNo }) {
 
   useEffect(() => {
     if (otp.every((digit) => digit !== "") && !isVerifying) {
-      onOTPVerify(phone);
+      const otpStr = otp.join("");
+      onOTPVerify(phone, otpStr);
     }
   }, [otp, isVerifying, onOTPVerify, phone]);
 
@@ -53,8 +54,9 @@ export default function VerifyOTP({ phone, onOTPVerify, changeMobileNo }) {
     if (otp.some((digit) => !digit)) return;
 
     setIsVerifying(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    onSuccess();
+    const otpStr = otp.join("");
+    await onOTPVerify(phone, otpStr);
+    setIsVerifying(false);
   };
 
   const handleResend = () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function FarmDetailsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [hasLand, setHasLand] = useState(true);
 
@@ -42,17 +44,17 @@ export default function FarmDetailsPage() {
     const errors = {};
     if (hasLand) {
       if (!farmDetails.location || farmDetails.location.trim() === "") {
-        errors.location = "Please provide your farm location";
+        errors.location = t("onboarding.farmDetails.errors.location");
       }
       const size = parseFloat(farmDetails.landSize);
       if (!farmDetails.landSize || Number.isNaN(size) || size <= 0) {
-        errors.landSize = "Please enter a valid land size (> 0)";
+        errors.landSize = t("onboarding.farmDetails.errors.landSize");
       }
       if (!farmDetails.soilType) {
-        errors.soilType = "Please select a soil type";
+        errors.soilType = t("onboarding.farmDetails.errors.soilType");
       }
       if (!farmDetails.waterSource) {
-        errors.waterSource = "Please select a water source";
+        errors.waterSource = t("onboarding.farmDetails.errors.waterSource");
       }
     }
 
@@ -64,14 +66,16 @@ export default function FarmDetailsPage() {
     setSubmitError("");
     const payload = { hasLand, ...farmDetails };
     saveFarmDetails(payload)
-      .then(() => {
+      .then((ok) => {
         setIsSubmitting(false);
-        // Permissions UI removed — continue to dashboard
-        router.push("/dashboard");
+        if (ok) {
+          // Permissions UI removed — continue to dashboard
+          router.push("/dashboard");
+        }
       })
       .catch(() => {
         setIsSubmitting(false);
-        setSubmitError("Failed to save farm details. Please try again.");
+        setSubmitError(t("onboarding.farmDetails.errors.saveFailedTryAgain"));
       });
     // if (!hasLand) {
     //   onSuccess({
@@ -99,7 +103,7 @@ export default function FarmDetailsPage() {
           const payload = JSON.parse(pending);
           const ok = await saveFarmDetails(payload);
           if (ok) {
-            setSaveMessage("Pending farm synced");
+            setSaveMessage(t("onboarding.farmDetails.messages.pendingSynced"));
             localStorage.removeItem("pendingFarm");
           }
         }
@@ -134,13 +138,76 @@ export default function FarmDetailsPage() {
       if (!navigator.onLine) {
         throw new Error("offline");
       }
+      // If we're in an onboarding flow (phone stored) then call complete-profile
+      const onboardPhone = localStorage.getItem("onboard_phone");
+      const authToken = localStorage.getItem("farmquest_auth");
+
+      if (onboardPhone && !authToken) {
+        // gather profile saved earlier (basic-info)
+        let profile = {};
+        try {
+          const p = localStorage.getItem("onboard_profile");
+          if (p) profile = JSON.parse(p);
+        } catch (e) {
+          console.warn("Failed to read onboard_profile", e);
+        }
+
+        const body = {
+          phone: onboardPhone,
+          name: profile.name,
+          email: profile.email,
+          location: profile.location,
+          // level is captured in previous step; try to read from session/local storage
+          level: localStorage.getItem("onboard_level") || undefined,
+          farmName: payload.farmName,
+          address: payload.location || payload.address,
+          size: payload.landSize,
+          primaryCrop: payload.primaryCrop,
+          soilType: payload.soilType,
+          waterSource: payload.waterSource,
+          hasLand: payload.hasLand,
+        };
+
+        const res = await fetch("/api/auth/complete-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(
+            data.message || t("onboarding.farmDetails.errors.completeProfile")
+          );
+        }
+
+        // Persist returned token
+        if (data.token) {
+          try {
+            localStorage.setItem(
+              "farmquest_auth",
+              JSON.stringify({ token: data.token })
+            );
+          } catch (e) {
+            console.warn("Failed to persist token", e);
+          }
+        }
+
+        setSaveMessage(t("onboarding.farmDetails.messages.profileCompleted"));
+        localStorage.removeItem("onboard_profile");
+        localStorage.removeItem("onboard_phone");
+        localStorage.removeItem("onboard_level");
+        localStorage.removeItem("pendingFarm");
+        return true;
+      }
+
+      // Normal flow: send farm to /api/farms
       const res = await fetch("/api/farms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("server error");
-      setSaveMessage("Saved successfully");
+      setSaveMessage(t("onboarding.farmDetails.messages.saved"));
       // Clear any pending local copy
       localStorage.removeItem("pendingFarm");
       return true;
@@ -149,10 +216,10 @@ export default function FarmDetailsPage() {
       // Persist locally for later sync
       try {
         localStorage.setItem("pendingFarm", JSON.stringify(payload));
-        setSaveMessage("Saved locally. Will sync when online.");
+        setSaveMessage(t("onboarding.farmDetails.messages.savedLocally"));
       } catch (e) {
         console.error(e);
-        setSubmitError("Failed to save farm details");
+        setSubmitError(t("onboarding.farmDetails.errors.saveFailed"));
         return false;
       }
       return false;
@@ -241,10 +308,10 @@ export default function FarmDetailsPage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-foreground mb-2">
-            Tell Us About Your Farm
+            {t("onboarding.farmDetails.heading")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Help us customize your experience
+            {t("onboarding.farmDetails.subheading")}
           </p>
         </div>
 
@@ -260,11 +327,10 @@ export default function FarmDetailsPage() {
               htmlFor="noLand"
               className="text-base font-semibold cursor-pointer leading-relaxed text-foreground"
             >
-              I am a beginner and don&apos;t have a farm yet
+              {t("onboarding.farmDetails.noLand.toggleLabel")}
             </Label>
             <p className="text-xs text-muted-foreground mt-1">
-              Start learning the basics. You can add farm details later from
-              your profile settings.
+              {t("onboarding.farmDetails.noLand.body")}
             </p>
           </div>
         </div>
@@ -273,11 +339,11 @@ export default function FarmDetailsPage() {
           <Collapse isOpen={hasLand} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="farmName" className="font-semibold">
-                Farm Name (Optional)
+                {t("onboarding.farmDetails.labels.farmName")}
               </Label>
               <Input
                 id="farmName"
-                placeholder="Green Valley Farm"
+                placeholder={t("onboarding.farmDetails.placeholders.farmName")}
                 value={farmDetails.farmName}
                 onChange={(e) =>
                   setFarmDetails({ ...farmDetails, farmName: e.target.value })
@@ -287,12 +353,14 @@ export default function FarmDetailsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="location" className="font-semibold">
-                Location
+                {t("onboarding.farmDetails.labels.location")}
               </Label>
               <div className="grid grid-cols-3 gap-2">
                 <Input
                   id="location"
-                  placeholder="Village, District, State"
+                  placeholder={t(
+                    "onboarding.farmDetails.placeholders.location"
+                  )}
                   className="col-span-2"
                   value={farmDetails.location}
                   onChange={(e) =>
@@ -309,7 +377,9 @@ export default function FarmDetailsPage() {
                     setLocationError("");
                     if (!navigator.geolocation) {
                       setLocationError(
-                        "Geolocation is not supported by your browser"
+                        t(
+                          "onboarding.farmDetails.errors.geolocationNotSupported"
+                        )
                       );
                       return;
                     }
@@ -341,13 +411,17 @@ export default function FarmDetailsPage() {
                             });
                           } else {
                             setLocationError(
-                              "Unable to determine address from coordinates"
+                              t(
+                                "onboarding.farmDetails.errors.unableToDetermineAddress"
+                              )
                             );
                           }
                         } catch (err) {
                           console.error(err);
                           setLocationError(
-                            "Failed to reverse geocode location"
+                            t(
+                              "onboarding.farmDetails.errors.reverseGeocodeFailed"
+                            )
                           );
                         } finally {
                           setIsDetectingLocation(false);
@@ -355,7 +429,8 @@ export default function FarmDetailsPage() {
                       },
                       (err) => {
                         setLocationError(
-                          err.message || "Failed to get location"
+                          err.message ||
+                            t("onboarding.farmDetails.errors.getLocationFailed")
                         );
                         setIsDetectingLocation(false);
                       },
@@ -366,8 +441,8 @@ export default function FarmDetailsPage() {
                   disabled={isDetectingLocation}
                 >
                   {isDetectingLocation
-                    ? "Detecting..."
-                    : "Use current location"}
+                    ? t("onboarding.farmDetails.buttons.detecting")
+                    : t("onboarding.farmDetails.buttons.useCurrentLocation")}
                 </button>
               </div>
               {locationError && (
@@ -382,7 +457,7 @@ export default function FarmDetailsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="landSize" className="font-semibold">
-                Land Size (in acres)
+                {t("onboarding.farmDetails.labels.landSize")}
               </Label>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                 <div className="flex-1">
@@ -405,7 +480,8 @@ export default function FarmDetailsPage() {
                 </div>
                 <div className="mt-2 sm:mt-0 w-28 text-center">
                   <div className="text-sm text-muted-foreground">
-                    {parseFloat(farmDetails.landSize || 2.5).toFixed(1)} acres
+                    {parseFloat(farmDetails.landSize || 2.5).toFixed(1)}{" "}
+                    {t("onboarding.farmDetails.units.acres")}
                   </div>
                 </div>
               </div>
@@ -419,7 +495,7 @@ export default function FarmDetailsPage() {
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2 ">
                 <Label htmlFor="soilType" className="font-semibold">
-                  Soil Type
+                  {t("onboarding.farmDetails.placeholders.soilType")}
                 </Label>
                 <Select
                   value={farmDetails.soilType}
@@ -429,15 +505,31 @@ export default function FarmDetailsPage() {
                   required
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select soil type" />
+                    <SelectValue
+                      placeholder={t(
+                        "onboarding.farmDetails.placeholders.soilType"
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="clay">Clay</SelectItem>
-                    <SelectItem value="sandy">Sandy</SelectItem>
-                    <SelectItem value="loamy">Loamy</SelectItem>
-                    <SelectItem value="silty">Silty</SelectItem>
-                    <SelectItem value="peaty">Peaty</SelectItem>
-                    <SelectItem value="chalky">Chalky</SelectItem>
+                    <SelectItem value="clay">
+                      {t("onboarding.farmDetails.options.soil.clay")}
+                    </SelectItem>
+                    <SelectItem value="sandy">
+                      {t("onboarding.farmDetails.options.soil.sandy")}
+                    </SelectItem>
+                    <SelectItem value="loamy">
+                      {t("onboarding.farmDetails.options.soil.loamy")}
+                    </SelectItem>
+                    <SelectItem value="silty">
+                      {t("onboarding.farmDetails.options.soil.silty")}
+                    </SelectItem>
+                    <SelectItem value="peaty">
+                      {t("onboarding.farmDetails.options.soil.peaty")}
+                    </SelectItem>
+                    <SelectItem value="chalky">
+                      {t("onboarding.farmDetails.options.soil.chalky")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {formErrors.soilType && (
@@ -448,7 +540,7 @@ export default function FarmDetailsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="waterSource" className="font-semibold">
-                  Water Source
+                  {t("onboarding.farmDetails.placeholders.waterSource")}
                 </Label>
                 <Select
                   value={farmDetails.waterSource}
@@ -458,17 +550,31 @@ export default function FarmDetailsPage() {
                   required
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select water source" />
+                    <SelectValue
+                      placeholder={t(
+                        "onboarding.farmDetails.placeholders.waterSource"
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="well">Well</SelectItem>
-                    <SelectItem value="borewell">Borewell</SelectItem>
-                    <SelectItem value="canal">Canal</SelectItem>
-                    <SelectItem value="river">River</SelectItem>
-                    <SelectItem value="rainwater">
-                      Rainwater Harvesting
+                    <SelectItem value="well">
+                      {t("onboarding.farmDetails.options.water.well")}
                     </SelectItem>
-                    <SelectItem value="pond">Pond</SelectItem>
+                    <SelectItem value="borewell">
+                      {t("onboarding.farmDetails.options.water.borewell")}
+                    </SelectItem>
+                    <SelectItem value="canal">
+                      {t("onboarding.farmDetails.options.water.canal")}
+                    </SelectItem>
+                    <SelectItem value="river">
+                      {t("onboarding.farmDetails.options.water.river")}
+                    </SelectItem>
+                    <SelectItem value="rainwater">
+                      {t("onboarding.farmDetails.options.water.rainwater")}
+                    </SelectItem>
+                    <SelectItem value="pond">
+                      {t("onboarding.farmDetails.options.water.pond")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {formErrors.waterSource && (
@@ -490,12 +596,10 @@ export default function FarmDetailsPage() {
               <div className="text-2xl">🌱</div>
               <div>
                 <p className="text-sm font-semibold text-foreground mb-1">
-                  Perfect! Let&apos;s start your farming journey
+                  {t("onboarding.farmDetails.noLand.heading")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  You&apos;ll access knowledge-based quests and tutorials. When
-                  you&apos;re ready to start your own farm, you can add the
-                  details anytime from your profile.
+                  {t("onboarding.farmDetails.noLand.body")}
                 </p>
               </div>
             </div>
@@ -503,7 +607,9 @@ export default function FarmDetailsPage() {
 
           <div className="">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Continue"}
+              {isSubmitting
+                ? t("onboarding.farmDetails.buttons.saving")
+                : t("onboarding.farmDetails.buttons.continue")}
             </Button>
             {submitError && (
               <p className="text-xs text-destructive mt-2">{submitError}</p>
@@ -517,7 +623,7 @@ export default function FarmDetailsPage() {
               href="/onboarding"
               className="text-center w-full block mt-3 text-sm text-muted-foreground hover:text-foreground"
             >
-              Back
+              {t("onboarding.farmDetails.buttons.back")}
             </Link>
           </div>
         </form>

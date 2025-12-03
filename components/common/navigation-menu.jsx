@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   Home,
   Leaf,
@@ -14,15 +15,15 @@ import {
   X,
   MapPin,
   Award,
+  LucideTrophy,
 } from "lucide-react";
+import Image from "next/image";
 
 export function NavigationMenu({
-  userName = "Raj Kumar",
-  userLevel = 3,
-  userLocation = "Patiala, Punjab",
   onLogout,
   currentScreen,
   onNavigate,
+  userData,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -38,7 +39,7 @@ export function NavigationMenu({
   }, [isMenuOpen]);
 
   const NAVIGATION_MENU_ITEMS = [
-    { icon: Home, label: "Dashboard", screenId: "farmer-dashboard" },
+    { icon: Home, label: "Dashboard", screenId: "/dashboard" },
     { icon: Leaf, label: "Quests", screenId: "quests-list" },
     { icon: Users, label: "Community", screenId: "community" },
     { icon: Gift, label: "Rewards", screenId: "rewards" },
@@ -46,6 +47,24 @@ export function NavigationMenu({
     { icon: Settings, label: "Settings", screenId: "settings" },
     { icon: HelpCircle, label: "Help", screenId: "farmer-dashboard" },
   ];
+
+  const pathname = usePathname();
+
+  const getScreenIdFromPath = (path) => {
+    if (!path) return null;
+    const p = path.toLowerCase();
+    if (p === "/" || p.startsWith("/dashboard")) return "farmer-dashboard";
+    if (p.startsWith("/quests")) return "quests-list";
+    if (p.startsWith("/community")) return "community";
+    if (p.startsWith("/rewards")) return "rewards";
+    if (p.startsWith("/profile") || p.startsWith("/farmer/profile"))
+      return "farmer-profile";
+    if (p.startsWith("/settings")) return "settings";
+    return null;
+  };
+
+  const activeScreenFromPath = getScreenIdFromPath(pathname);
+  const activeScreen = currentScreen || activeScreenFromPath;
 
   const handleMenuNavigation = (screenId) => {
     if (onNavigate) {
@@ -69,7 +88,7 @@ export function NavigationMenu({
     <>
       <button
         onClick={handleMenuToggle}
-        className="fixed top-4 left-4 z-40 p-3 bg-card border border-border rounded-xl shadow-md hover:shadow-lg hover:bg-primary/5 transition-all"
+        className="fixed bg-white shadow top-5 left-4 z-40 p-3 rounded-xl hover:shadow-lg hover:bg-primary/5 transition-all"
         aria-label="Open navigation menu"
       >
         <Menu className="icon-md text-foreground" />
@@ -92,55 +111,64 @@ export function NavigationMenu({
         aria-label="Main navigation"
       >
         <div className="h-full overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-border">
-            <h2 className="text-h3 text-foreground">Menu</h2>
-            <button
+          {/* <button
               onClick={() => setIsMenuOpen(false)}
               className="p-2 hover:bg-muted rounded-lg transition-colors"
               aria-label="Close menu"
             >
               <X className="icon-sm text-muted-foreground" />
-            </button>
-          </div>
+            </button> */}
 
-          <div className="p-6 bg-linear-to-br from-primary/5 to-accent/5 border-b border-border">
-            <div className="bg-card rounded-2xl p-4 border border-border shadow-sm">
+          <div className="bg-linear-to-br from-green-500/50 to-accent/5 ">
+            <div className="p-4  shadow-sm">
               <div className="flex items-center gap-4 mb-3">
                 <div className="center-flex w-14 h-14 bg-linear-to-br from-primary to-secondary rounded-full text-primary-foreground font-bold text-xl">
-                  {userName.charAt(0)}
+                  {userData?.name?.charAt(0)}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-h4 text-foreground leading-tight">
-                    {userName}
+                    {userData?.name}
                   </h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Award className="w-3 h-3 text-accent" />
-                    <span className="text-small font-medium text-accent">
-                      Level {userLevel}
-                    </span>
+                  <div className="flex items-center gap-2 text-medium text-muted-foreground mt-2">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    <span>{userData?.location}</span>
                   </div>
                 </div>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="icon-sm text-muted-foreground" />
+                </button>{" "}
               </div>
-              <div className="flex items-center gap-2 text-medium text-muted-foreground">
-                <MapPin className="w-3 h-3" />
-                <span>{userLocation}</span>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-1 mt-1 bg-blue-500 px-2 py-0.5 rounded-full text-white text-xs">
+                  <Award className="w-3 h-3 " />
+                  <span className="text-small font-semibold ">
+                    {userData?.level.toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 mt-1 bg-green-500 px-2 py-0.5 rounded-full text-white text-xs">
+                  <LucideTrophy className="w-3 h-3" />
+                  <span className="text-small font-semibold">1500 XP</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="p-4">
-            <div className="space-y-2">
+          <div className="mt-4">
+            <div className="space-y-2 font-medium">
               {NAVIGATION_MENU_ITEMS.map((menuItem, index) => {
                 const MenuIcon = menuItem.icon;
-                const isActiveScreen = currentScreen === menuItem.screenId;
+                const isActiveScreen = activeScreen === menuItem.screenId;
+
                 return (
                   <button
                     key={index}
                     onClick={() => handleMenuNavigation(menuItem.screenId)}
-                    className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all group ${
-                      isActiveScreen
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "hover:bg-muted"
+                    className={`w-full flex items-center gap-4 px-4 py-2 rounded-xl transition-all group ${
+                      isActiveScreen ? "bg-green-100 " : "hover:bg-muted"
                     }`}
                   >
                     <div
@@ -152,16 +180,14 @@ export function NavigationMenu({
                     >
                       <MenuIcon
                         className={`icon-sm ${
-                          isActiveScreen
-                            ? "text-primary-foreground"
-                            : "text-primary"
+                          isActiveScreen ? "text-black" : "text-primary"
                         }`}
                       />
                     </div>
                     <span
                       className={`font-medium group-hover:translate-x-0.5 transition-transform ${
                         isActiveScreen
-                          ? "text-primary-foreground"
+                          ? "text-black font-semibold!"
                           : "text-foreground"
                       }`}
                     >
@@ -185,13 +211,21 @@ export function NavigationMenu({
             </div>
           </div>
 
-          <div className="p-6 border-t border-border mt-auto">
-            <div className="bg-accent/10 rounded-xl p-4">
-              <p className="text-medium text-muted-foreground text-center">
-                Farmstellar v1
-                <br />
-                Empowering sustainable farming
-              </p>
+          <div className=" border-t">
+            <div className="bg-accent/10 rounded-xl p-4 flex items-center gap-4">
+              <Image
+                src="/logo.png"
+                alt="FarmStellar Logo"
+                width={80}
+                height={80}
+                className="mx-auto mb-2"
+              />
+              <div className="flex flex-col items-start text-muted-foreground space-y-2">
+                <span className="text-medium">Farmstellar V1</span>
+                <small className="text-xs text-gray-400">
+                  Empowering sustainable farming
+                </small>
+              </div>
             </div>
           </div>
         </div>
