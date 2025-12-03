@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Award,
   Globe,
+  Download,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -132,14 +133,35 @@ export default function LandingPage() {
                 </a>
                 <button
                   type="button"
-                  onClick={() =>
-                    document
-                      .getElementById("features")
-                      .scrollIntoView({ behavior: "smooth" })
-                  }
+                  onClick={() => {
+                    // prefer direct programmatic trigger if available
+                    try {
+                      if (
+                        typeof window !== "undefined" &&
+                        window.farmstellarTriggerInstall
+                      ) {
+                        window.farmstellarTriggerInstall();
+                        return;
+                      }
+                    } catch (e) {}
+                    // fallback: scroll to features (existing behavior)
+                    try {
+                      const el = document.getElementById("features");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    } catch (e) {}
+                    // also set the localStorage hook so PWAProvider can react if listening
+                    try {
+                      localStorage.setItem("farmstellar_prompt", "1");
+                      // dispatch a custom event for same-window listeners
+                      window.dispatchEvent(
+                        new Event("farmstellar_show_prompt")
+                      );
+                    } catch (e) {}
+                  }}
                   className="border-2 sm:text-lg px-4 py-2 sm:px-8 sm:py-6 rounded-md"
                 >
-                  {t("hero.learnMore")}
+                  <Download className="w-5 h-5 inline-block mr-2" />
+                  Install App
                 </button>
               </div>
 

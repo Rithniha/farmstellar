@@ -23,6 +23,21 @@ export default function PWAProvider() {
       const delay = /Mobi|Android/i.test(navigator.userAgent)
         ? mobileDelay
         : desktopDelay;
+      // Respect a previous desktop dismiss choice
+      try {
+        const uaLocal = navigator.userAgent || "";
+        const isIosLocal = /iphone|ipad|ipod/i.test(uaLocal);
+        const isMobileLocal = /Mobi|Android/i.test(uaLocal) || isIosLocal;
+        const isDesktopLocal = !isMobileLocal;
+        if (
+          isDesktopLocal &&
+          localStorage.getItem("farmstellar_pwa_dismissed") === "1"
+        ) {
+          // user dismissed on desktop previously, do not re-show
+          return;
+        }
+      } catch (e) {}
+
       timer = setTimeout(() => setShowBanner(true), delay);
     }
 
@@ -98,12 +113,56 @@ export default function PWAProvider() {
     }
   }
 
+  // Expose a global helper so other pages/components can trigger the prompt
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // attach a callable on window for convenience
+    // the function will call the internal triggerInstallPrompt
+    // also support a custom event `farmstellar_show_prompt` for same-window dispatch
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.farmstellarTriggerInstall = () => {
+      try {
+        triggerInstallPrompt();
+      } catch (e) {}
+    };
+
+    const handler = () => {
+      try {
+        triggerInstallPrompt();
+      } catch (e) {}
+    };
+    window.addEventListener("farmstellar_show_prompt", handler);
+
+    return () => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete window.farmstellarTriggerInstall;
+      } catch (e) {}
+      window.removeEventListener("farmstellar_show_prompt", handler);
+    };
+  }, [deferredPrompt, isIos]);
+
   // Quick shortcut for CTA on pages (other pages can call this by setting localStorage flag)
   useEffect(() => {
     function onShowInstallNow() {
       // for example a landing CTA may set localStorage.setItem('farmstellar_prompt', '1')
       const val = localStorage.getItem("farmstellar_prompt");
       if (val === "1") {
+        try {
+          const uaLocal = navigator.userAgent || "";
+          const isIosLocal = /iphone|ipad|ipod/i.test(uaLocal);
+          const isMobileLocal = /Mobi|Android/i.test(uaLocal) || isIosLocal;
+          const isDesktopLocal = !isMobileLocal;
+          if (
+            isDesktopLocal &&
+            localStorage.getItem("farmstellar_pwa_dismissed") === "1"
+          ) {
+            // respect desktop dismissal
+            return;
+          }
+        } catch (e) {}
         // show immediately
         setShowBanner(true);
       }
@@ -121,9 +180,11 @@ export default function PWAProvider() {
           id="pwa-install-banner"
           style={{
             position: "fixed",
-            left: "600px",
-            right: "600px",
-            bottom: "60px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "calc(100% - 24px)",
+            maxWidth: 720,
+            bottom: "20px",
             zIndex: 9999,
             background: "white",
             color: "#064e3b",
@@ -155,6 +216,17 @@ export default function PWAProvider() {
           <div style={{ display: "flex", gap: 8 }}>
             <button
               onClick={() => {
+                try {
+                  const uaLocal = navigator.userAgent || "";
+                  const isIosLocal = /iphone|ipad|ipod/i.test(uaLocal);
+                  const isMobileLocal =
+                    /Mobi|Android/i.test(uaLocal) || isIosLocal;
+                  const isDesktopLocal = !isMobileLocal;
+                  if (isDesktopLocal) {
+                    // remember desktop dismiss so we don't nag the user repeatedly
+                    localStorage.setItem("farmstellar_pwa_dismissed", "1");
+                  }
+                } catch (e) {}
                 setShowBanner(false);
               }}
               style={{
