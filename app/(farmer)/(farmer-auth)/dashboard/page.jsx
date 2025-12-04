@@ -1,6 +1,5 @@
 "use client";
 
-import { Sun, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import LeaderboardCard from "@/components/app/leaderboard-card";

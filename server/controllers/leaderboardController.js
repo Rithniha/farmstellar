@@ -1,4 +1,4 @@
-import User from "../models/User.js";
+import User from "../../lib/models/User.js";
 
 export const getLeaderboard = async (req, res) => {
   try {

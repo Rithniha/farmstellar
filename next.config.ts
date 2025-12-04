@@ -19,19 +19,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
-  // Development-only rewrites to proxy API calls to the local Express server
-  async rewrites() {
-    const devProxy = process.env.NODE_ENV === "development";
-    return devProxy
-      ? [
-          {
-            source: "/api/:path*",
-            destination: "http://localhost:4000/api/:path*",
-          },
-        ]
-      : [];
-  },
 };
 
 export default nextConfig;

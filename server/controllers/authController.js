@@ -1,9 +1,9 @@
 import { hash } from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
-import Farm from "../models/Farm.js";
+import User from "../../lib/models/User.js";
+import Farm from "../../lib/models/Farm.js";
 import { sendOTPService, verifyOTPService } from "../services/twilioService.js";
-import Otp from "../models/Otp.js";
+import Otp from "../../lib/models/Otp.js";
 
 const { sign } = jwt;
 
@@ -406,7 +406,9 @@ export async function getMe(req, res) {
     // Fetch user from database
     const user = await User.findById(userId).populate("farm");
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     return res.status(200).json({
