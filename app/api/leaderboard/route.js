@@ -13,6 +13,8 @@ export async function GET(req) {
       .limit(limit);
 
     const leaderboard = topUsers.map((user, index) => ({
+      _id: user._id,
+      id: user._id,
       rank: index + 1,
       name: user.name,
       xp: user.xp,

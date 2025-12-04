@@ -39,7 +39,7 @@ export default function LoginOTPWrapper() {
         // If server returned sampleOtp (dev), show it so developer can type it
         if (data.sampleOtp) {
           // warn developer (dev-only)
-          toast(`Dev OTP for ${phone}: ${data.sampleOtp}`);
+          toast(`👩‍💻 Dev OTP for ${phone}: ${data.sampleOtp}`);
         }
 
         // persist phone for onboarding flow (so next pages can access it)
