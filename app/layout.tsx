@@ -39,10 +39,46 @@ export default function RootLayout({
         <ClientI18nLoader />
         <PWAProvider />
         <Toaster
-          position="top-right"
+          position="top-center"
           toastOptions={{
-            className:
-              "max-sm:bottom-4! max-sm:top-auto! max-sm:left-1/2! max-sm:-translate-x-1/2! max-sm:right-auto!",
+            style: {
+              background: "#16a34a",
+              color: "#ffffff",
+              fontWeight: "600",
+              borderRadius: "10px",
+              padding: "16px",
+              boxShadow: "0 8px 24px rgba(22, 163, 74, 0.3)",
+            },
+            success: {
+              style: {
+                background: "#16a34a",
+                color: "#ffffff",
+              },
+              iconTheme: {
+                primary: "#fbbf24",
+                secondary: "#16a34a",
+              },
+            },
+            error: {
+              style: {
+                background: "#dc2626",
+                color: "#ffffff",
+              },
+              iconTheme: {
+                primary: "#fbbf24",
+                secondary: "#dc2626",
+              },
+            },
+            loading: {
+              style: {
+                background: "#2563eb",
+                color: "#ffffff",
+              },
+              iconTheme: {
+                primary: "#fbbf24",
+                secondary: "#2563eb",
+              },
+            },
           }}
         />
         {children}

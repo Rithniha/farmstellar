@@ -120,37 +120,37 @@
 .deep-forest {
   /* Deep Forest Theme - Rich Greens and Earthy Tones */
   --background: oklch(0.15 0.05 140);
-  --foreground: oklch(0.90 0.05 100);
-  --card: oklch(0.20 0.06 140);
-  --card-foreground: oklch(0.90 0.05 100);
-  --popover: oklch(0.20 0.06 140);
-  --popover-foreground: oklch(0.90 0.05 100);
-  --primary: oklch(0.50 0.15 145);
+  --foreground: oklch(0.9 0.05 100);
+  --card: oklch(0.2 0.06 140);
+  --card-foreground: oklch(0.9 0.05 100);
+  --popover: oklch(0.2 0.06 140);
+  --popover-foreground: oklch(0.9 0.05 100);
+  --primary: oklch(0.5 0.15 145);
   --primary-foreground: oklch(0.98 0.01 120);
   --secondary: oklch(0.25 0.08 140);
-  --secondary-foreground: oklch(0.90 0.05 100);
+  --secondary-foreground: oklch(0.9 0.05 100);
   --muted: oklch(0.25 0.05 140);
-  --muted-foreground: oklch(0.70 0.05 140);
+  --muted-foreground: oklch(0.7 0.05 140);
   --accent: oklch(0.88 0.18 110);
   --accent-foreground: oklch(0.25 0.06 150);
   --destructive: oklch(0.55 0.15 25);
   --destructive-foreground: oklch(0.95 0.02 120);
-  --border: oklch(0.30 0.05 140);
+  --border: oklch(0.3 0.05 140);
   --input: oklch(0.25 0.05 140);
-  --ring: oklch(0.50 0.15 145);
-  --chart-1: oklch(0.50 0.15 145);
+  --ring: oklch(0.5 0.15 145);
+  --chart-1: oklch(0.5 0.15 145);
   --chart-2: oklch(0.88 0.18 110);
   --chart-3: oklch(0.35 0.05 150);
   --chart-4: oklch(0.65 0.04 145);
   --chart-5: oklch(0.25 0.05 140);
   --sidebar: oklch(0.18 0.06 140);
-  --sidebar-foreground: oklch(0.90 0.05 100);
-  --sidebar-primary: oklch(0.50 0.15 145);
+  --sidebar-foreground: oklch(0.9 0.05 100);
+  --sidebar-primary: oklch(0.5 0.15 145);
   --sidebar-primary-foreground: oklch(0.98 0.01 120);
   --sidebar-accent: oklch(0.88 0.18 110);
   --sidebar-accent-foreground: oklch(0.25 0.06 150);
-  --sidebar-border: oklch(0.30 0.05 140);
-  --sidebar-ring: oklch(0.50 0.15 145);
+  --sidebar-border: oklch(0.3 0.05 140);
+  --sidebar-ring: oklch(0.5 0.15 145);
 }
 
 @theme inline {
@@ -197,7 +197,8 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow;
+    transition-property: color, background-color, border-color,
+      text-decoration-color, fill, stroke, opacity, box-shadow;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
   }
@@ -226,7 +227,6 @@
 
   /* Japanese minimalist animations - smooth and energizing */
   @keyframes float-gentle {
-
     0%,
     100% {
       transform: translateY(0px);
@@ -238,7 +238,6 @@
   }
 
   @keyframes sway {
-
     0%,
     100% {
       transform: rotate(-2deg);
@@ -282,7 +281,6 @@
   }
 
   @keyframes wiggle {
-
     0%,
     100% {
       transform: rotate(-3deg);
@@ -317,7 +315,6 @@
 
   /* Lime glow animation for rewards and achievements */
   @keyframes lime-glow-pulse {
-
     0%,
     100% {
       box-shadow: 0 0 10px var(--lime-glow), 0 0 20px var(--lime-glow);
@@ -416,16 +413,23 @@
 
   /* Matcha gradient backgrounds - soft foam to deep matcha */
   .watercolor-bg {
-    background: linear-gradient(135deg, oklch(0.95 0.02 140) 0%, oklch(0.93 0.03 145) 50%, oklch(0.94 0.02 135) 100%);
+    background: linear-gradient(
+      135deg,
+      oklch(0.95 0.02 140) 0%,
+      oklch(0.93 0.03 145) 50%,
+      oklch(0.94 0.02 135) 100%
+    );
   }
 
   /* Lime glow effect - ONLY for gamification elements */
   .soft-glow {
-    box-shadow: 0 0 15px rgba(198, 255, 71, 0.2), 0 0 30px rgba(198, 255, 71, 0.1);
+    box-shadow: 0 0 15px rgba(198, 255, 71, 0.2),
+      0 0 30px rgba(198, 255, 71, 0.1);
   }
 
   .lime-glow {
-    box-shadow: 0 0 20px rgba(198, 255, 71, 0.4), 0 0 40px rgba(198, 255, 71, 0.2);
+    box-shadow: 0 0 20px rgba(198, 255, 71, 0.4),
+      0 0 40px rgba(198, 255, 71, 0.2);
   }
 
   /* Leaf/sprout shaped elements */
