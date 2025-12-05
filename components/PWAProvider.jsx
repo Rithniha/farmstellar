@@ -9,6 +9,66 @@ export default function PWAProvider() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [isIos, setIsIos] = useState(false);
 
+  // Handle pull-to-refresh and cache clearing
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let touchStartY = 0;
+
+    function handleTouchStart(e) {
+      // Only detect pull if at top of page
+      if (window.scrollY === 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }
+
+    function handleTouchEnd(e) {
+      if (window.scrollY !== 0) return;
+      const touchEndY = e.changedTouches[0].clientY;
+      // Detect pull-down gesture (more than 100px)
+      if (touchEndY - touchStartY > 100) {
+        clearAppCache();
+      }
+    }
+
+    async function clearAppCache() {
+      try {
+        // Clear service worker cache
+        if (
+          "serviceWorker" in navigator &&
+          navigator.serviceWorker.controller
+        ) {
+          const channel = new MessageChannel();
+          navigator.serviceWorker.controller.postMessage(
+            { type: "CLEAR_CACHE" },
+            [channel.port2]
+          );
+        }
+
+        // Clear browser caches
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((key) => caches.delete(key)));
+        }
+
+        // Force reload from network
+        window.location.reload();
+      } catch (error) {
+        console.warn("Cache clear failed:", error);
+        window.location.reload();
+      }
+    }
+
+    // Attach touch listeners for pull-to-refresh
+    document.addEventListener("touchstart", handleTouchStart, false);
+    document.addEventListener("touchend", handleTouchEnd, false);
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
+
   useEffect(() => {
     let timer = null;
 
