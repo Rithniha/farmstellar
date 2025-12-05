@@ -42,7 +42,7 @@ export default function RootLayout({
           position="top-right"
           toastOptions={{
             className:
-              "max-sm:!bottom-4 max-sm:!top-auto max-sm:!left-1/2 max-sm:!-translate-x-1/2 max-sm:!right-auto",
+              "max-sm:bottom-4! max-sm:top-auto! max-sm:left-1/2! max-sm:-translate-x-1/2! max-sm:right-auto!",
           }}
         />
         {children}

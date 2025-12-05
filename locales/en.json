@@ -244,6 +244,11 @@
       "noData": "No leaderboard data available"
     }
   },
+  "greetings": {
+    "morning": "Good Morning",
+    "afternoon": "Good Afternoon",
+    "evening": "Good Evening"
+  },
   "chatbot": {
     "greeting": "👋 Namaste! I'm FarmStellar Bot, your farming companion. How can I help you today?",
     "placeholder": "Ask me anything about farming...",

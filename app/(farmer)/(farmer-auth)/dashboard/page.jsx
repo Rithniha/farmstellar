@@ -74,7 +74,7 @@ export default function FarmerDashboard({ onStartQuest }) {
                 {/* <Sun className="w-4 h-4 text-accent" /> */}
                 <h1 className="text-lg sm:text-xl font-bold text-foreground">
                   {t("dashboard.greeting", {
-                    greeting: getGreeting(),
+                    greeting: getGreeting(t),
                     name: userData?.name || "Farmer",
                   })}
                 </h1>
